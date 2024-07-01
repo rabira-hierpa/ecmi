@@ -1,6 +1,6 @@
-import Footer from "@/components/Footer";
 import Image from "next/image";
 import Link from "next/link";
+import Footer from "../../components/footer";
 
 const Custom404 = () => {
   return (

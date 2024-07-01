@@ -1,8 +1,9 @@
 {
-  "home": "Home Page",
+  "home": "Home",
   "about": "About",
   "contactUs": "Contact Us",
   "login": "Login",
   "support": "Support",
-  "services": "Services"
+  "services": "Services",
+  "standards": "Standards"
 }
