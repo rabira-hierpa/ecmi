@@ -3,18 +3,39 @@ name: Deploy Next.js App to Prod
 on:
   push:
     branches:
-      - main
+      - main # Deploy when changes are pushed to the dev branch
 
 jobs:
-  deploy:
+  migrate:
+    runs-on: ubuntu-latest
+    environment: Prod
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Setup Prisma
+        run: npx prisma generate
+
+      - name: Run Prisma migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: npx prisma migrate deploy
+
+  build:
+    needs: migrate
     runs-on: ubuntu-latest
     environment: Prod
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       NEXT_PUBLIC_GHOST_URL: ${{ secrets.NEXT_PUBLIC_GHOST_URL }}
       NEXT_PUBLIC_GHOST_CONTENT_API_KEY: ${{ secrets.NEXT_PUBLIC_GHOST_CONTENT_API_KEY }}
-      APP_PORT: ${{ secrets.APP_PORT }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -27,14 +48,20 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run Prisma migrations
-        env:
-          DATABASE_URL: ${{ env.DATABASE_URL }}
-        run: npx prisma migrate deploy
-
       - name: Build Next.js app
         run: npm run build
 
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: Prod
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      NEXT_PUBLIC_GHOST_URL: ${{ secrets.NEXT_PUBLIC_GHOST_URL }}
+      NEXT_PUBLIC_GHOST_CONTENT_API_KEY: ${{ secrets.NEXT_PUBLIC_GHOST_CONTENT_API_KEY }}
+      APP_PORT: ${{ secrets.APP_PORT }}
+
+    steps:
       - name: Deploy to Server
         uses: appleboy/ssh-action@v0.1.6
         with:
@@ -47,7 +74,7 @@ jobs:
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" 
             cd /var/www/ecmi
             git pull origin dev
-            npm install --omit=dev
+            npm install 
             npm install @prisma/client
             prisma migrate dev
             export PATH=$PATH:/var/www/ecmi/node_modules/.bin 
