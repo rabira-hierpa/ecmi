@@ -10,18 +10,14 @@ const LanguageSelector: React.FC<PageProps> = ({ params: { lng } }) => {
   const [isOpen, setOpen] = useState(false);
   const toggelMenu = () => setOpen(!isOpen);
   const [language] = useState(lng);
+
   const toggleLanguage = () => {
     const currentLanguage = lng;
-
-    console.log("currentLanguage", currentLanguage);
-
     if (currentLanguage === "en") {
       window.location.href = "/am";
     } else {
       window.location.href = "/en";
     }
-
-    // currentLanguage === "en" ? setCurrentLanguage("am") : setCurrentLanguage("en");
   };
 
   useEffect(() => {
