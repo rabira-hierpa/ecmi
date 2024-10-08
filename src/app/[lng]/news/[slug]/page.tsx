@@ -9,9 +9,15 @@ import { getSinglePost } from "@/app/ghost/posts";
 import dayjs from "dayjs";
 import SafeHTML from "@/components/safe-html";
 import Link from "next/link";
+import { useTranslation } from "@/app/i18n/client";
 
-export const NewsPage = ({ params }: { params: { slug: string } }) => {
-  const { slug } = params;
+export const NewsPage = ({
+  params,
+}: {
+  params: { slug: string; lng: string };
+}) => {
+  const { slug, lng } = params;
+  const { t } = useTranslation(lng, "translation");
   const { startLoading, stopLoading, renderLoading } = useLoading();
   const [news, setNews] = React.useState<PostOrPage>();
 
@@ -46,7 +52,9 @@ export const NewsPage = ({ params }: { params: { slug: string } }) => {
         <div className="flex-col md:flex-row py-10">
           <div className="flex-col font-bold text-xl text-blue-400  my-12">
             <div>
-              <Link href="/news">Blogs {`>`}</Link>
+              <Link href="/news">
+                {t("news")} {`>`}
+              </Link>
               <span className="text-secondary-main text-sm pl-2">
                 {news?.title}
               </span>
